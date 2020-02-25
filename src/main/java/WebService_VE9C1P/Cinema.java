@@ -1,6 +1,5 @@
 package WebService_VE9C1P;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -41,6 +40,7 @@ public class Cinema implements ICinema{
 	@Override
 	public void init(int rows, int columns) throws ICinemaInitCinemaException {
 		seats.clear();
+		locks.clear();
 		if (rows <= 26 && rows >= 1 && columns <= 100 && columns >= 1) {
 			for (char i = 'A'; i < 65 + rows; i++) {
 				HashMap<String, SeatStatus> inner = new HashMap<String, SeatStatus>();
@@ -72,7 +72,7 @@ public class Cinema implements ICinema{
 	@Override
 	public SeatStatus getSeatStatus(Seat seat) throws ICinemaGetSeatStatusCinemaException {
 		if(!validSeat(seat)) 
-			throw new ICinemaGetSeatStatusCinemaException("Bad seat", new CinemaException());
+			throw new ICinemaGetSeatStatusCinemaException("Bad seat number", new CinemaException());
 		return seats.get(seat.getRow()).get(seat.getColumn());
 	}
 
@@ -82,7 +82,7 @@ public class Cinema implements ICinema{
 		endSeat.setRow(seat.getRow());
 		endSeat.setColumn(Integer.toString((Integer.parseInt(seat.getColumn())+count-1)));
 		if(!validSeat(seat) || !validSeat(endSeat))
-			throw new ICinemaLockCinemaException("Bad seat range", new CinemaException());
+			throw new ICinemaLockCinemaException("Not enough seats", new CinemaException());
 		
 		String uniqueID = UUID.randomUUID().toString();
 		Lock lock = new Lock();
@@ -90,7 +90,7 @@ public class Cinema implements ICinema{
 		lock.setSeat(seat);
 		for (int i = 0; i < count; i++) {
 			if (seats.get(seat.getRow()).get(Integer.toString((Integer.parseInt(seat.getColumn())+i))) != SeatStatus.FREE)
-				throw new ICinemaLockCinemaException("Not all seats are free", new CinemaException());
+				throw new ICinemaLockCinemaException("Seat is not free", new CinemaException());
 		}
 		for (int i = 0; i < count; i++) {
 			seats.get(seat.getRow()).replace(Integer.toString((Integer.parseInt(seat.getColumn())+i)), SeatStatus.LOCKED);
